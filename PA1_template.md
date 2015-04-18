@@ -17,7 +17,7 @@
 
 
 ## What is mean total number of steps taken per day?
-###Calculate the total number of steps taken each day.  
+####Calculate the total number of steps taken each day.  
 
 1. Load the dplyr library to make sure it's available
 
@@ -45,7 +45,7 @@ byday <- group_by(activity_data_raw, date)
 steps_byday <- summarize(byday, step_sum = sum(steps, na.rm=TRUE))
 ```
 
-###Make a histogram of the total number of steps taken each day
+####Make a histogram of the total number of steps taken each day
 
 ```r
 hist(steps_byday$step_sum, main="Histogram of sum of steps by day", xlab="Sum of Daily Steps")
@@ -53,7 +53,7 @@ hist(steps_byday$step_sum, main="Histogram of sum of steps by day", xlab="Sum of
 
 ![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
 
-###Calculate & report the mean number of steps per day
+####Calculate & report the mean number of steps per day
 
 ```r
 mean(steps_byday$step_sum)
@@ -62,7 +62,7 @@ mean(steps_byday$step_sum)
 ```
 ## [1] 9354.23
 ```
-###Calculate & report the median number of steps per day
+####Calculate & report the median number of steps per day
 
 ```r
 median(steps_byday$step_sum)
@@ -72,9 +72,9 @@ median(steps_byday$step_sum)
 ## [1] 10395
 ```
 
-## What is the average daily activity pattern?
+##What is the average daily activity pattern?
 
-###Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+####Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
 First, group by interval & find the average number of steps for each interval across days
 
@@ -90,7 +90,7 @@ plot(steps_byinterval$interval, steps_byinterval$step_avg, type="l", xlab="Time 
 
 ![](PA1_template_files/figure-html/unnamed-chunk-7-1.png) 
 
-###Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+####Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
 First, reorder the data frame so it's in order from most to least average steps
 
@@ -111,8 +111,111 @@ head(select(steps_ordered, interval), 1)
 ## 1      835
 ```
 
-## Inputing missing values
+##Imputing missing values
+
+####Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+Calling summary on an object will let you know the number of NA values in the object
+
+```r
+summary(activity_data_raw)
+```
+
+```
+##      steps                date          interval     
+##  Min.   :  0.00   2012-10-01:  288   Min.   :   0.0  
+##  1st Qu.:  0.00   2012-10-02:  288   1st Qu.: 588.8  
+##  Median :  0.00   2012-10-03:  288   Median :1177.5  
+##  Mean   : 37.38   2012-10-04:  288   Mean   :1177.5  
+##  3rd Qu.: 12.00   2012-10-05:  288   3rd Qu.:1766.2  
+##  Max.   :806.00   2012-10-06:  288   Max.   :2355.0  
+##  NA's   :2304     (Other)   :15840
+```
+
+####Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+
+Any attempt to fill in missing data always has major downsides - even if you're using related values found in the dataset, you're still making major assumptions that may very well be false.  However, in cases where you must do this, you should always look for patterns in what data is missing as well as look at what analysis you're going to do on the modified data so you can best mitigate impact of potentially "bad" data.
+
+In this case, any day with an NA value for any interval actually has NA for every interval that day.  So, we're not just missing periodic elements within a day, but we missing the entire day's data in each case.  Given that fact, I opted to replace each NA with the average value for that 5-minute interval since, if you were to use the mean for that day, all of those days (8 in total) would be 0 for every interval.  That seems like a less realistic replacement method than using the average for that interval from all other days measured since that would mean those people were completely still for 8 days of the dataset.
+
+####Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+```r
+activity_data_complete <- activity_data_raw
+summary(activity_data_complete)
+```
+
+```
+##      steps                date          interval     
+##  Min.   :  0.00   2012-10-01:  288   Min.   :   0.0  
+##  1st Qu.:  0.00   2012-10-02:  288   1st Qu.: 588.8  
+##  Median :  0.00   2012-10-03:  288   Median :1177.5  
+##  Mean   : 37.38   2012-10-04:  288   Mean   :1177.5  
+##  3rd Qu.: 12.00   2012-10-05:  288   3rd Qu.:1766.2  
+##  Max.   :806.00   2012-10-06:  288   Max.   :2355.0  
+##  NA's   :2304     (Other)   :15840
+```
+
+```r
+summary(activity_data_raw)
+```
+
+```
+##      steps                date          interval     
+##  Min.   :  0.00   2012-10-01:  288   Min.   :   0.0  
+##  1st Qu.:  0.00   2012-10-02:  288   1st Qu.: 588.8  
+##  Median :  0.00   2012-10-03:  288   Median :1177.5  
+##  Mean   : 37.38   2012-10-04:  288   Mean   :1177.5  
+##  3rd Qu.: 12.00   2012-10-05:  288   3rd Qu.:1766.2  
+##  Max.   :806.00   2012-10-06:  288   Max.   :2355.0  
+##  NA's   :2304     (Other)   :15840
+```
+
+```r
+for (i in 1:length(activity_data_complete$steps)) {
+	#Logic here is if the current steps value is NA, find the average steps value (grouped by interval) for the same interval as the current
+	#iteration & replace the NA value with the average steps for this interval
+	if (is.na(activity_data_complete$steps[i])) {
+		  activity_data_complete$steps[i] <- filter(steps_byinterval, interval==activity_data_complete$interval[i]) %>% select (step_avg)
+	}	
+}
+```
+####Make a histogram of the total number of steps taken each day and calculate and report the mean and median total number of steps taken per day. 
+Make a histogram
 
 
+```r
+byday_c <- group_by(activity_data_complete, date)
+#Flatten the list so summarize can be used
+byday_c$steps <- unlist(byday_c$steps)
+steps_byday_c <- summarize(byday_c, step_sum = sum(steps))
+hist(steps_byday_c$step_sum, main="Histogram of sum of steps by day", xlab="Sum of Daily Steps")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-12-1.png) 
+
+Calculate mean
+
+```r
+mean(steps_byday_c$step_sum)
+```
+
+```
+## [1] 10766.19
+```
+
+Calculate median
+
+```r
+median(steps_byday_c$step_sum)
+```
+
+```
+## [1] 10766.19
+```
+
+
+####Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+Because I chose to replace NAs with the average step value for a given interval, it did change the mean/median of the resulting data set.  (The original computation has used 0 for all of those NA values; so, if I had instead replaced the NAs with the mean of each day (0, in all cases) these values would have stayed the same.)  However, by replacing misisng values with the mean for the interval, it made the mean & median values match.
 
 ## Are there differences in activity patterns between weekdays and weekends?

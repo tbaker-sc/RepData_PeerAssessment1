@@ -178,6 +178,9 @@ for (i in 1:length(activity_data_complete$steps)) {
 		  activity_data_complete$steps[i] <- filter(steps_byinterval, interval==activity_data_complete$interval[i]) %>% select (step_avg)
 	}	
 }
+#This logic turns step into a list
+#Flatten the list so summarize can be used in later steps
+activity_data_complete$steps <- unlist(activity_data_complete$steps)
 ```
 ####Make a histogram of the total number of steps taken each day and calculate and report the mean and median total number of steps taken per day. 
 Make a histogram
@@ -185,8 +188,6 @@ Make a histogram
 
 ```r
 byday_c <- group_by(activity_data_complete, date)
-#Flatten the list so summarize can be used
-byday_c$steps <- unlist(byday_c$steps)
 steps_byday_c <- summarize(byday_c, step_sum = sum(steps))
 hist(steps_byday_c$step_sum, main="Histogram of sum of steps by day", xlab="Sum of Daily Steps")
 ```
@@ -219,3 +220,7 @@ median(steps_byday_c$step_sum)
 Because I chose to replace NAs with the average step value for a given interval, it did change the mean/median of the resulting data set.  (The original computation had used 0 for all of those NA values; so, if I had instead replaced the NAs with the mean of each day (0, in all cases) these values would have stayed the same.)  However, by replacing misisng values with the mean for the interval, it changed the mean & median values; they now match.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+####Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
+
+
+####Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.

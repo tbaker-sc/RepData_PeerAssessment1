@@ -129,6 +129,6 @@ median(steps_byday_c$step_sum)
 
 ####Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
-Because I chose to replace NAs with the average step value for a given interval, it did change the mean/median of the resulting data set.  (The original computation has used 0 for all of those NA values; so, if I had instead replaced the NAs with the mean of each day (0, in all cases) these values would have stayed the same.)  However, by replacing misisng values with the mean for the interval, it made the mean & median values match.
+Because I chose to replace NAs with the average step value for a given interval, it did change the mean/median of the resulting data set.  (The original computation had used 0 for all of those NA values; so, if I had instead replaced the NAs with the mean of each day (0, in all cases) these values would have stayed the same.)  However, by replacing misisng values with the mean for the interval, it changed the mean & median values; they now match.
 
 ## Are there differences in activity patterns between weekdays and weekends?

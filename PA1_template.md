@@ -222,5 +222,34 @@ Because I chose to replace NAs with the average step value for a given interval,
 ## Are there differences in activity patterns between weekdays and weekends?
 ####Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
 
-
+```r
+#Add a column with day of week
+activity_data_complete <- mutate(activity_data_complete, day=weekdays(as.Date(activity_data_complete$date)))
+#Convert day of week to weekday or weekend
+for (i in 1:length(activity_data_complete$day)) {
+	#Logic here is if the current day value is Saturday or Sunday, replace with weekend
+	#Otherwise, replace with weekday
+	if ((activity_data_complete$day[i] == "Sunday") | (activity_data_complete$day[i] == "Saturday")) {
+		  activity_data_complete$day[i] <- "weekend"
+	}	else {
+		activity_data_complete$day[i] <- "weekday"
+	}
+}
+#Make it a factor
+activity_data_complete$day <- as.factor(activity_data_complete$day)
+```
 ####Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
+
+
+
+```r
+step_byday_byinterval <- activity_data_complete %>% group_by(day, interval) %>% summarize(step_avg = mean(steps))
+```
+Then, make the time series plot of inverval (x-axis) vs average steps (y-axis)
+
+```r
+par(mfrow = c(2,1))
+plot(step_byday_byinterval$interval, step_byday_byinterval$step_avg, type="l", xlab="Time Interval", ylab="Average Steps")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-17-1.png) 

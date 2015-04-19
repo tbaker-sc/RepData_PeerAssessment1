@@ -94,8 +94,6 @@ In this case, any day with an NA value for any interval actually has NA for ever
 ####Create a new dataset that is equal to the original dataset but with the missing data filled in.
 ```{r}
 activity_data_complete <- activity_data_raw
-summary(activity_data_complete)
-summary(activity_data_raw)
 
 for (i in 1:length(activity_data_complete$steps)) {
 	#Logic here is if the current steps value is NA, find the average steps value (grouped by interval) for the same interval as the current

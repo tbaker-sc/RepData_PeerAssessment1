@@ -89,7 +89,7 @@ summary(activity_data_raw)
 
 Any attempt to fill in missing data always has major downsides - even if you're using related values found in the dataset, you're still making major assumptions that may very well be false.  However, in cases where you must do this, you should always look for patterns in what data is missing as well as look at what analysis you're going to do on the modified data so you can best mitigate impact of potentially "bad" data.
 
-In this case, any day with an NA value for any interval actually has NA for every interval that day.  So, we're not just missing periodic elements within a day, but we missing the entire day's data in each case.  Given that fact, I opted to replace each NA with the average value for that 5-minute interval since, if you were to use the mean for that day, all of those days (8 in total) would be 0 for every interval.  That seems like a less realistic replacement method than using the average for that interval from all other days measured since that would mean those people were completely still for 8 days of the dataset.
+In this case, any day with an NA value for any interval actually has NA for every interval that day.  So, we're not just missing periodic elements within a day, but we missing the entire day's data in each case.  Given that fact, I opted to replace each NA with the average value for that 5-minute interval since, if you were to use the mean for that day, all of those days (8 in total) would be 0 for every interval.  That seems like a less realistic replacement method than using the average for that interval from all other days measured since  using the daily mean, 0, would make the data show those people were completely still for 8 days of the dataset.
 
 ####Create a new dataset that is equal to the original dataset but with the missing data filled in.
 ```{r}
@@ -150,14 +150,18 @@ for (i in 1:length(activity_data_complete$day)) {
 #Make it a factor
 activity_data_complete$day <- as.factor(activity_data_complete$day)
 ```
-####Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
+####Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
 
 
 ```{r}
+#First, group by day/interval, then average the number of steps for each grouping
 step_byday_byinterval <- activity_data_complete %>% group_by(day, interval) %>% summarize(step_avg = mean(steps))
 ```
 Then, make the time series plot of inverval (x-axis) vs average steps (y-axis)
 ```{r}
-par(mfrow = c(2,1))
-plot(step_byday_byinterval$interval, step_byday_byinterval$step_avg, type="l", xlab="Time Interval", ylab="Average Steps")
+library(ggplot2)
+g <- ggplot(step_byday_byinterval, aes(interval, step_avg)) + geom_line() + facet_grid(day~.) 
+g <- g + labs(y = "Number of Steps")
+g <- g + labs(x = "Interval")
+print(g)
 ```

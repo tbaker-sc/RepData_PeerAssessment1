@@ -85,7 +85,8 @@ steps_byinterval <- summarize(byinterval, step_avg = mean(steps, na.rm=TRUE))
 Then, make the time series plot of inverval (x-axis) vs average steps (y-axis)
 
 ```r
-plot(steps_byinterval$interval, steps_byinterval$step_avg, type="l", xlab="Time Interval", ylab="Steps averaged across all days")
+plot(steps_byinterval$interval, steps_byinterval$step_avg, type="l", 
+	xlab="Time Interval", ylab="Steps averaged across all days")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-7-1.png) 
@@ -143,10 +144,11 @@ In this case, any day with an NA value for any interval actually has NA for ever
 activity_data_complete <- activity_data_raw
 
 for (i in 1:length(activity_data_complete$steps)) {
-	#Logic here is if the current steps value is NA, find the average steps value (grouped by interval) for the same interval as the current
-	#iteration & replace the NA value with the average steps for this interval
+	#Logic here is if the current steps value is NA, find the average steps value (grouped by interval) 
+	#for the same interval as the current iteration & replace the NA value with the average steps for this interval
 	if (is.na(activity_data_complete$steps[i])) {
-		  activity_data_complete$steps[i] <- filter(steps_byinterval, interval==activity_data_complete$interval[i]) %>% select (step_avg)
+		  activity_data_complete$steps[i] <- filter(steps_byinterval, 
+		  	interval==activity_data_complete$interval[i]) %>% select (step_avg)
 	}	
 }
 #This logic turns step into a list
@@ -215,7 +217,8 @@ activity_data_complete$day <- as.factor(activity_data_complete$day)
 
 ```r
 #First, group by day/interval, then average the number of steps for each grouping
-step_byday_byinterval <- activity_data_complete %>% group_by(day, interval) %>% summarize(step_avg = mean(steps))
+step_byday_byinterval <- activity_data_complete %>% group_by(day, interval) %>% 
+	summarize(step_avg = mean(steps))
 ```
 Then, make the time series plot of inverval (x-axis) vs average steps (y-axis)
 
